@@ -1,0 +1,8 @@
+streamlit
+numpy
+xgboost
+shap
+matplotlib
+reportlab
+scikit-learn
+dice_ml
