@@ -184,13 +184,13 @@ The generated PDF report includes:
 
 ```python
 permitted_range = {
-    "Systolic BP":  [70.0, 180.0],
-    "Diastolic":    [40.0, 120.0],
-    "BS":           [1.0,  25.0],
-    "Body Temp":    [95.0, 105.0],
-    "BMI":          [10.0, 60.0],
+    "Systolic BP":  [110.0, 130.0],
+    "Diastolic":    [70.0, 90.0],
+    "BS":           [3.0,  20.0],
+    "Body Temp":    [95.0, 104.0],
+    "BMI":          [18.5, 28.0],
     "Mental Health":[0.0,  1.0],
-    "Heart Rate":   [40.0, 200.0],
+    "Heart Rate":   [60.0, 100.0],
 }
 ```
 
