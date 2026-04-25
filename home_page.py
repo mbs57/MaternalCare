@@ -11,24 +11,20 @@ def render_home():
                 <span style="font-size:48px; line-height:1;">🤱</span>
                 <div>
                     <div class="hero-title">MaternalCare</div>
-                    <div class="hero-sub">AI-powered maternal risk assessment with explainable predictions & personalised clinical guidance</div>
+                    <div class="hero-sub">AI-powered maternal risk assessment with explainable predictions &amp; personalised clinical guidance</div>
                 </div>
             </div>
             <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
-                <span style="background:rgba(255,255,255,0.2); color:white; border-radius:999px;
-                             padding:0.25rem 0.9rem; font-size:12px; font-weight:600;">
+                <span class="feature-pill" style="color:white !important; background:rgba(255,255,255,0.22) !important;">
                     🧠 SHAP Explainability
                 </span>
-                <span style="background:rgba(255,255,255,0.2); color:white; border-radius:999px;
-                             padding:0.25rem 0.9rem; font-size:12px; font-weight:600;">
+                <span class="feature-pill" style="color:white !important; background:rgba(255,255,255,0.22) !important;">
                     💡 DiCE Counterfactuals
                 </span>
-                <span style="background:rgba(255,255,255,0.2); color:white; border-radius:999px;
-                             padding:0.25rem 0.9rem; font-size:12px; font-weight:600;">
+                <span class="feature-pill" style="color:white !important; background:rgba(255,255,255,0.22) !important;">
                     🩹 Personalised Advice
                 </span>
-                <span style="background:rgba(255,255,255,0.2); color:white; border-radius:999px;
-                             padding:0.25rem 0.9rem; font-size:12px; font-weight:600;">
+                <span class="feature-pill" style="color:white !important; background:rgba(255,255,255,0.22) !important;">
                     📄 PDF Report
                 </span>
             </div>
@@ -48,43 +44,49 @@ def render_home():
     col1, col2, col3 = st.columns(3, gap="medium")
 
     with col1:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">🎯</span><span>What It Assesses</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">🎯</span><span>What It Assesses</span></div>
+                <p class="card-body">
+                    Estimates maternal risk level — <strong>Low, Moderate, or High</strong> —
+                    based on vital signs, blood metrics, and clinical history.
+                    Designed for routine screening and antenatal visits.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Estimates maternal risk level — **Low, Moderate, or High** — "
-            "based on vital signs, blood metrics, and clinical history. "
-            "Designed for routine screening and antenatal visits."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">📋</span><span>Input Parameters</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">📋</span><span>Input Parameters</span></div>
+                <p class="card-body">
+                    Accepts <strong>11 clinical variables</strong> including blood pressure, blood sugar,
+                    body temperature, BMI, heart rate, age, and obstetric history flags
+                    such as diabetes and previous complications.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Accepts **11 clinical variables** including blood pressure, blood sugar, "
-            "body temperature, BMI, heart rate, age, and obstetric history flags "
-            "such as diabetes and previous complications."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col3:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">📤</span><span>What You Get</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">📤</span><span>What You Get</span></div>
+                <p class="card-body">
+                    A risk classification with confidence score, SHAP feature explanations,
+                    DiCE counterfactual action scenarios, tailored clinical advice,
+                    and a downloadable <strong>PDF report</strong>.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "A risk classification with confidence score, SHAP feature explanations, "
-            "DiCE counterfactual action scenarios, tailored clinical advice, "
-            "and a downloadable **PDF report**."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # ── CTA Button ────────────────────────────────────────────────────────────
     st.markdown("<div style='margin: 1.4rem 0 0.4rem 0;'>", unsafe_allow_html=True)
@@ -106,43 +108,49 @@ def render_home():
     col_a, col_b, col_c = st.columns(3, gap="medium")
 
     with col_a:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">📊</span><span>SHAP Bar Plot</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">📊</span><span>SHAP Bar Plot</span></div>
+                <p class="card-body">
+                    Shows <strong>which features had the largest impact</strong> on the prediction
+                    and whether each one pushed risk <strong>up ↑ or down ↓</strong>.
+                    Ideal for a quick at-a-glance overview of what drove the outcome.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Shows **which features had the largest impact** on the prediction "
-            "and whether each one pushed risk **up ↑ or down ↓**. "
-            "Ideal for a quick at-a-glance overview of what drove the outcome."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col_b:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">🌊</span><span>Waterfall Plot</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">🌊</span><span>Waterfall Plot</span></div>
+                <p class="card-body">
+                    Walks through the prediction <strong>step by step</strong>, showing how each feature
+                    cumulatively shifts the score from the model baseline to the final output.
+                    Best for deep inspection of individual cases.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Walks through the prediction **step by step**, showing how each feature "
-            "cumulatively shifts the score from the model baseline to the final output. "
-            "Best for deep inspection of individual cases."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col_c:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">💡</span><span>Counterfactual + Advice</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">💡</span><span>Counterfactual + Advice</span></div>
+                <p class="card-body">
+                    Powered by <strong>DiCE</strong>: answers <em>'What is the minimum change needed
+                    to get a different prediction?'</em> Each scenario pairs quantitative targets
+                    with evidence-based clinical guidance for modifiable risk factors.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Powered by **DiCE**: answers *'What is the minimum change needed to get a different prediction?'* "
-            "Each scenario pairs quantitative targets with evidence-based clinical guidance "
-            "for modifiable risk factors."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # ── Advice Section explainer ──────────────────────────────────────────────
     st.markdown("---")
@@ -156,30 +164,34 @@ def render_home():
 
     col_d, col_e = st.columns(2, gap="medium")
     with col_d:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">⚠️</span><span>Flagged Parameter Advice</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">⚠️</span><span>Flagged Parameter Advice</span></div>
+                <p class="card-body">
+                    When a feature falls outside the expected clinical range, a tailored advice card
+                    is shown covering dietary changes, medication reminders, lifestyle interventions,
+                    and when to seek urgent care — specific to that parameter.
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "When a feature falls outside the expected clinical range, a tailored advice card "
-            "is shown covering dietary changes, medication reminders, lifestyle interventions, "
-            "and when to seek urgent care — specific to that parameter."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with col_e:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(
-            """<div class="card-header"><span class="icon">🎯</span><span>DiCE-Guided Targets</span></div>""",
+            """
+            <div class="card">
+                <div class="card-header"><span class="icon">🎯</span><span>DiCE-Guided Targets</span></div>
+                <p class="card-body">
+                    Even when all parameters are within range, if the model predicts <strong>High Risk</strong>,
+                    the top SHAP-driven features are surfaced with DiCE quantitative targets — e.g.,
+                    <em>'Reducing Blood Sugar by 1.8 mmol/L could shift the risk category.'</em>
+                </p>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
-        st.write(
-            "Even when all parameters are within range, if the model predicts **High Risk**, "
-            "the top SHAP-driven features are surfaced with DiCE quantitative targets — e.g., "
-            "*'Reducing Blood Sugar by 1.8 mmol/L could shift the risk category.'*"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # ── Workflow steps ────────────────────────────────────────────────────────
     st.markdown("---")
@@ -189,30 +201,30 @@ def render_home():
     )
 
     steps = [
-        ("1️⃣", "Enter patient vitals", "Fill in the 11 clinical parameters in the assessment form."),
-        ("2️⃣", "Click Predict & Explain", "The model returns a risk level with confidence score instantly."),
-        ("3️⃣", "Review SHAP explanations", "Understand which factors most influenced the prediction."),
+        ("1️⃣", "Enter patient vitals",      "Fill in the 11 clinical parameters in the assessment form."),
+        ("2️⃣", "Click Predict & Explain",   "The model returns a risk level with confidence score instantly."),
+        ("3️⃣", "Review SHAP explanations",  "Understand which factors most influenced the prediction."),
         ("4️⃣", "Explore What-If scenarios", "See DiCE counterfactuals and integrated clinical advice."),
-        ("5️⃣", "Download PDF Report", "Share a structured report with the full assessment, SHAP, and advice."),
+        ("5️⃣", "Download PDF Report",       "Share a structured report with the full assessment, SHAP, and advice."),
     ]
 
     step_cols = st.columns(5, gap="small")
     for col, (num, title, desc) in zip(step_cols, steps):
         with col:
             st.markdown(
-                f"<div class='card' style='text-align:center; padding:1rem;'>"
-                f"<div style='font-size:26px; margin-bottom:0.4rem;'>{num}</div>"
-                f"<div style='font-family:Playfair Display,serif; font-weight:600; font-size:13px; "
-                f"color:#5b2d7a; margin-bottom:0.4rem;'>{title}</div>"
-                f"<div style='font-size:11.5px; color:#8b7b8e; line-height:1.5;'>{desc}</div>"
-                f"</div>",
+                f"""
+                <div class="card step-card">
+                    <div style="font-size:26px; margin-bottom:0.4rem; text-align:center;">{num}</div>
+                    <div class="step-title">{title}</div>
+                    <p class="card-body step-desc">{desc}</p>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
 
     # ── Disclaimer ────────────────────────────────────────────────────────────
     st.markdown(
-        "<p style='font-size:11.5px; color:#aaa; text-align:center; margin-top:1.5rem; "
-        "border-top: 1px solid #ede0ee; padding-top:1.2rem;'>"
+        "<p class='disclaimer-text'>"
         "⚠️ <b>MaternalCare</b> is a <b>clinical decision-support aid</b> only. "
         "All predictions, explanations, and advice must be reviewed and validated by a "
         "qualified healthcare professional before any clinical action is taken."
