@@ -129,16 +129,15 @@ FEATURE_ADVICE_DS3 = {
 # Normal ranges
 # ─────────────────────────────────────────────
 NORMAL_RANGES_DS3 = {
-    "Systolic BP":  (110.0, 130.0),
-    "Diastolic":    (70.0, 90.0),
-    "BS":           (3.9, 7.8),
-    "Body Temp":    (97.0, 99.0),
-    "BMI":          (18.5, 28.0),
-    "Mental Health": (0.0, 0.0),
-    "Heart Rate":   (60.0, 90.0),
+    "Systolic BP":   (110.0, 130.0),
+    "Diastolic":     (70.0,  90.0),
+    "BS":            (3.9,   7.8),
+    "Body Temp":     (97.0,  99.0),
+    "BMI":           (18.5,  28.0),
+    "Mental Health": (0.0,   0.0),
+    "Heart Rate":    (60.0,  90.0),
 }
 
-# Features that are binary flags (1 = issue present)
 BINARY_RISK_FLAGS_DS3 = {
     "Previous Complications",
     "Preexisting Diabetes",
@@ -163,11 +162,6 @@ def get_flagged_features(input_data: dict, normal_ranges: dict) -> list:
 
 
 def get_shap_driven_advice_features(shap_values, feature_names, input_data, top_n=3) -> list:
-    """
-    Return features to show advice for based on SHAP magnitude,
-    even when values are within normal range.
-    Only returns features that have advice defined.
-    """
     idx_sorted = np.argsort(np.abs(shap_values))[::-1]
     features = []
     for i in idx_sorted:
@@ -180,7 +174,13 @@ def get_shap_driven_advice_features(shap_values, feature_names, input_data, top_
 
 
 # ─────────────────────────────────────────────
-# CSS — refreshed MaternalCare design
+# CSS  — complete rewrite for reliable dark mode
+# Strategy: use CSS custom properties defined
+# under both :root (light) and a dark-mode block.
+# Streamlit 1.x sets  data-theme="dark"  on <html>.
+# ALL hardcoded colours in HTML strings are
+# replaced with var(--xxx) references so they
+# respond automatically.
 # ─────────────────────────────────────────────
 def apply_global_css():
     st.markdown(
@@ -188,20 +188,296 @@ def apply_global_css():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
+        /* ══════════════════════════════════════════════
+           LIGHT MODE — CSS custom properties
+        ══════════════════════════════════════════════ */
+        :root {
+            --bg-page:            linear-gradient(160deg,#fdf6f0 0%,#fef9f5 40%,#f5f0fa 100%);
+            --bg-card:            rgba(255,255,255,0.92);
+            --bg-card-solid:      #ffffff;
+            --bg-result-card:     linear-gradient(135deg,#ffffff 0%,#fdf0f8 50%,#f5eeff 100%);
+            --bg-shap-card:       rgba(255,255,255,0.9);
+            --bg-advice:          linear-gradient(135deg,#fff9f5,#fff3ee);
+            --bg-advice-urgent:   linear-gradient(135deg,#fff5f5,#fdecea);
+            --bg-advice-shap:     linear-gradient(135deg,#f5f0ff,#ede8ff);
+            --bg-dice-info:       linear-gradient(135deg,#eef4fb,#f8f0ff);
+            --bg-hero:            linear-gradient(135deg,#b5467a 0%,#7c3aed 100%);
+            --bg-pill:            rgba(181,70,122,0.10);
+            --bg-proba-track:     #f0e8f5;
+            --bg-metric:          rgba(255,255,255,0.7);
+            --bg-allclear:        linear-gradient(135deg,#f0fff8,#e8f8f0);
+            --bg-highrisk:        linear-gradient(135deg,#fdecea,#fff5f5);
+            --bg-moderate:        linear-gradient(135deg,#fff9f5,#fff3ee);
+
+            --text-primary:       #3d2c50;
+            --text-secondary:     #5a4a6a;
+            --text-caption:       #7a6a8a;
+            --text-card-header:   #5b2d7a;
+            --text-advice-body:   #3d2c50;
+            --text-advice-title:  #3d1f5a;
+            --text-dice-info:     #2d1a4b;
+            --text-range:         #8a6a9a;
+            --text-proba-label:   #6a5a7a;
+            --text-shap-driver:   #5b2d7a;
+            --text-shap-hint:     #7a6a8a;
+            --text-allclear:      #0f9b6e;
+            --text-allclear-sub:  #1a6040;
+            --text-highrisk:      #c0392b;
+            --text-highrisk-sub:  #5a1010;
+            --text-moderate-sub:  #5a2a10;
+
+            --border-card:        rgba(181,70,122,0.15);
+            --border-result:      rgba(181,70,122,0.20);
+            --border-shap:        rgba(181,70,122,0.12);
+            --border-metric:      rgba(181,70,122,0.12);
+
+            --shadow-card:        0 4px 24px rgba(181,70,122,0.08),0 1px 4px rgba(0,0,0,0.04);
+            --shadow-card-hov:    0 8px 32px rgba(181,70,122,0.14),0 2px 8px rgba(0,0,0,0.06);
+            --shadow-result:      0 10px 32px rgba(181,70,122,0.10);
+            --shadow-shap:        0 2px 12px rgba(0,0,0,0.04);
+            --shadow-advice:      0 3px 12px rgba(230,126,34,0.09);
+            --shadow-advice-urg:  0 3px 12px rgba(192,57,43,0.11);
+            --shadow-advice-shp:  0 3px 12px rgba(124,58,237,0.09);
+
+            --color-accent:       #b5467a;
+            --color-purple:       #7c3aed;
+            --color-purple-mid:   #5b2d7a;
+            --color-green:        #0f9b6e;
+            --color-red:          #c0392b;
+            --color-amber:        #e6a817;
+
+            --advice-dice-color:  #4a3070;
+            --advice-dice-bg:     rgba(124,58,237,0.08);
+            --dice-em-color:      #3a2060;
+            --dice-b-color:       #3a2060;
+        }
+
+        /* ══════════════════════════════════════════════
+           DARK MODE — override every custom property
+           Streamlit sets  data-theme="dark"  on <html>
+        ══════════════════════════════════════════════ */
+        html[data-theme="dark"] {
+            --bg-page:            linear-gradient(160deg,#0f0a18 0%,#130d20 40%,#0d0a1a 100%);
+            --bg-card:            rgba(36,24,54,0.97);
+            --bg-card-solid:      #221638;
+            --bg-result-card:     linear-gradient(135deg,#1c1228 0%,#271335 50%,#191028 100%);
+            --bg-shap-card:       rgba(36,24,54,0.95);
+            --bg-advice:          linear-gradient(135deg,#2a1a0e,#2e1c10);
+            --bg-advice-urgent:   linear-gradient(135deg,#2a1010,#300e0e);
+            --bg-advice-shap:     linear-gradient(135deg,#1a1230,#201540);
+            --bg-dice-info:       linear-gradient(135deg,#0e1420,#180f2e);
+            --bg-hero:            linear-gradient(135deg,#8c2d58 0%,#5b28b8 100%);
+            --bg-pill:            rgba(181,70,122,0.25);
+            --bg-proba-track:     rgba(181,70,122,0.20);
+            --bg-metric:          rgba(36,24,54,0.85);
+            --bg-allclear:        linear-gradient(135deg,#0a2018,#0d2a1e);
+            --bg-highrisk:        linear-gradient(135deg,#2a0a0a,#320e0e);
+            --bg-moderate:        linear-gradient(135deg,#2a1508,#321808);
+
+            --text-primary:       #ecddf8;
+            --text-secondary:     #c8b8d8;
+            --text-caption:       #b8a8c8;
+            --text-card-header:   #ddb8f5;
+            --text-advice-body:   #ddd0ec;
+            --text-advice-title:  #eac8ff;
+            --text-dice-info:     #cdbae8;
+            --text-range:         #cc9ee0;
+            --text-proba-label:   #c0b0d0;
+            --text-shap-driver:   #ddb8f5;
+            --text-shap-hint:     #b8a8c8;
+            --text-allclear:      #4ecfa0;
+            --text-allclear-sub:  #80e0b8;
+            --text-highrisk:      #f07070;
+            --text-highrisk-sub:  #f0a0a0;
+            --text-moderate-sub:  #f0c090;
+
+            --border-card:        rgba(181,70,122,0.35);
+            --border-result:      rgba(181,70,122,0.40);
+            --border-shap:        rgba(181,70,122,0.28);
+            --border-metric:      rgba(181,70,122,0.28);
+
+            --shadow-card:        0 4px 24px rgba(0,0,0,0.50),0 1px 4px rgba(0,0,0,0.35);
+            --shadow-card-hov:    0 8px 32px rgba(0,0,0,0.65),0 2px 8px rgba(0,0,0,0.40);
+            --shadow-result:      0 10px 32px rgba(0,0,0,0.50);
+            --shadow-shap:        0 2px 12px rgba(0,0,0,0.40);
+            --shadow-advice:      0 3px 12px rgba(0,0,0,0.35);
+            --shadow-advice-urg:  0 3px 12px rgba(0,0,0,0.40);
+            --shadow-advice-shp:  0 3px 12px rgba(0,0,0,0.35);
+
+            --advice-dice-color:  #caa8f8;
+            --advice-dice-bg:     rgba(124,58,237,0.30);
+            --dice-em-color:      #c8a8f0;
+            --dice-b-color:       #d8b8ff;
+        }
+
+        /* ══════════════════════════════════════════════
+           BASE
+        ══════════════════════════════════════════════ */
         html, body, [class*="css"] {
             font-family: 'Nunito', sans-serif;
         }
-
-        /* ── background ── */
         .stApp {
-            background: linear-gradient(160deg, #fdf6f0 0%, #fef9f5 40%, #f5f0fa 100%);
+            background: var(--bg-page) !important;
         }
 
+        /* ══════════════════════════════════════════════
+           STREAMLIT NATIVE WIDGET TEXT
+           Must use !important — Streamlit injects its
+           own colour rules at high specificity.
+        ══════════════════════════════════════════════ */
+        /* All labels / helper text */
+        label, .stRadio label, .stNumberInput label,
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stWidgetLabel"] span,
+        [data-baseweb="radio"] span,
+        p, span, div {
+            /* Don't override here globally — do it per-component below */
+        }
+
+        /* Number-input label */
+        [data-testid="stNumberInput"] > label {
+            color: var(--text-primary) !important;
+        }
+        [data-testid="stNumberInput"] > label p,
+        [data-testid="stNumberInput"] > label span {
+            color: var(--text-primary) !important;
+        }
+        /* Number-input box */
+        [data-testid="stNumberInput"] input {
+            color: var(--text-primary) !important;
+            background-color: var(--bg-card-solid) !important;
+            border-color: var(--border-card) !important;
+        }
+        /* Radio label */
+        [data-testid="stRadio"] > label {
+            color: var(--text-primary) !important;
+        }
+        [data-testid="stRadio"] > label p,
+        [data-testid="stRadio"] > label span {
+            color: var(--text-primary) !important;
+        }
+        /* Radio option text */
+        [data-baseweb="radio"] p,
+        [data-baseweb="radio"] span,
+        [data-baseweb="radio"] label {
+            color: var(--text-primary) !important;
+        }
+        /* Generic widget label catch-all */
+        [data-testid="stWidgetLabel"] p {
+            color: var(--text-primary) !important;
+        }
+        /* Markdown text */
+        [data-testid="stMarkdownContainer"] p,
+        [data-testid="stMarkdownContainer"] li,
+        [data-testid="stMarkdownContainer"] span {
+            color: var(--text-primary) !important;
+        }
+        /* Caption */
+        [data-testid="stCaptionContainer"] p {
+            color: var(--text-caption) !important;
+        }
+
+        /* ══════════════════════════════════════════════
+           CARD  (custom HTML divs)
+        ══════════════════════════════════════════════ */
+        .card {
+            padding: 1.5rem 1.7rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-card);
+            background: var(--bg-card) !important;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 1.2rem;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: var(--shadow-card-hov); }
+
+        .card-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-card-header) !important;
+        }
+        .card-header span.icon { font-size: 20px; }
+
+        .card-body {
+            font-size: 13.5px;
+            color: var(--text-primary) !important;
+            line-height: 1.65;
+            margin: 0;
+        }
+        .card-body strong, .card-body b { color: var(--text-card-header) !important; }
+        .card-body em                   { color: var(--text-secondary) !important; }
+
+        /* catch all <p> directly inside a card */
+        .card p {
+            color: var(--text-primary) !important;
+        }
+        .card b, .card strong {
+            color: var(--text-card-header) !important;
+        }
+
+        /* ══════════════════════════════════════════════
+           RESULT CARD
+        ══════════════════════════════════════════════ */
+        .result-card {
+            padding: 1.8rem 2rem;
+            border-radius: 22px;
+            background: var(--bg-result-card) !important;
+            border: 1px solid var(--border-result);
+            box-shadow: var(--shadow-result);
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: var(--text-card-header) !important;
+        }
+
+        /* ══════════════════════════════════════════════
+           RISK BADGES
+        ══════════════════════════════════════════════ */
+        .risk-badge {
+            display: inline-block;
+            padding: 0.4rem 1.3rem;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: white !important;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .risk-low      { background: linear-gradient(135deg,#0f9b6e,#27ae60); box-shadow: 0 4px 12px rgba(15,155,110,0.3); }
+        .risk-moderate { background: linear-gradient(135deg,#e6a817,#d68910); box-shadow: 0 4px 12px rgba(230,168,23,0.3); }
+        .risk-high     { background: linear-gradient(135deg,#c0392b,#e74c3c); box-shadow: 0 4px 12px rgba(192,57,43,0.3); }
+
+        .risk-main-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        .risk-subtext {
+            font-size: 12.5px;
+            color: var(--text-secondary) !important;
+            margin-top: 0.3rem;
+        }
+
+        /* ══════════════════════════════════════════════
+           TYPOGRAPHY HELPERS
+        ══════════════════════════════════════════════ */
         .main-title {
             font-family: 'Playfair Display', serif;
             font-size: 46px;
             font-weight: 700;
-            background: linear-gradient(135deg, #b5467a 0%, #7c3aed 100%);
+            background: linear-gradient(135deg,#b5467a 0%,#7c3aed 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -212,120 +488,70 @@ def apply_global_css():
         }
         .main-subtitle {
             font-size: 15px;
-            font-weight: 400;
             text-align: center;
-            color: #8b7b8e;
+            color: var(--text-secondary) !important;
             margin-bottom: 2rem;
-            letter-spacing: 0.3px;
         }
-
-        /* ── cards ── */
-        .card {
-            padding: 1.5rem 1.7rem;
-            border-radius: 20px;
-            border: 1px solid rgba(181, 70, 122, 0.12);
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 24px rgba(181,70,122,0.07), 0 1px 4px rgba(0,0,0,0.04);
-            margin-bottom: 1.2rem;
-            transition: box-shadow 0.2s;
-        }
-        .card:hover {
-            box-shadow: 0 8px 32px rgba(181,70,122,0.12), 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .card-header {
-            font-family: 'Playfair Display', serif;
-            font-size: 17px;
-            font-weight: 600;
+        .section-caption {
+            font-size: 13px;
+            color: var(--text-caption) !important;
             margin-bottom: 0.7rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #5b2d7a;
-        }
-        .card-header span.icon { font-size: 20px; }
-
-        .result-card {
-            padding: 1.8rem 2rem;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #ffffff 0%, #fdf0f8 50%, #f5eeff 100%);
-            border: 1px solid rgba(181, 70, 122, 0.18);
-            box-shadow: 0 10px 32px rgba(181,70,122,0.10);
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        .result-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 0.7rem;
-            color: #5b2d7a;
         }
 
-        /* ── risk badges ── */
-        .risk-badge {
-            display: inline-block;
-            padding: 0.4rem 1.3rem;
-            border-radius: 999px;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: white;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+        h3 {
+            font-family: 'Playfair Display', serif !important;
+            color: var(--text-card-header) !important;
         }
-        .risk-low      { background: linear-gradient(135deg, #0f9b6e, #27ae60); box-shadow: 0 4px 12px rgba(15,155,110,0.3); }
-        .risk-moderate { background: linear-gradient(135deg, #e6a817, #d68910); box-shadow: 0 4px 12px rgba(230,168,23,0.3); }
-        .risk-high     { background: linear-gradient(135deg, #c0392b, #e74c3c); box-shadow: 0 4px 12px rgba(192,57,43,0.3); }
 
-        .risk-main-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
-            font-weight: 700;
-            margin-top: 0.5rem;
-        }
-        .risk-subtext { font-size: 12.5px; color: #8b7b8e; margin-top: 0.3rem; }
-
-        .section-caption { font-size: 13px; color: #9a8a9d; margin-bottom: 0.7rem; }
-
+        /* ══════════════════════════════════════════════
+           SHAP CARD
+        ══════════════════════════════════════════════ */
         .shap-card {
             padding: 0.8rem 1rem 0.5rem 1rem;
             border-radius: 16px;
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(181,70,122,0.1);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            background: var(--bg-shap-card) !important;
+            border: 1px solid var(--border-shap);
+            box-shadow: var(--shadow-shap);
             margin-top: 0.5rem;
         }
+        .shap-card p { color: var(--text-shap-hint) !important; }
 
-        /* ── advice cards ── */
+        /* ══════════════════════════════════════════════
+           ADVICE CARDS
+        ══════════════════════════════════════════════ */
         .advice-card {
             padding: 1.2rem 1.5rem;
             border-radius: 16px;
-            background: linear-gradient(135deg, #fff9f5, #fff3ee);
+            background: var(--bg-advice) !important;
             border-left: 5px solid #e67e22;
             margin-bottom: 1rem;
-            box-shadow: 0 3px 12px rgba(230,126,34,0.09);
+            box-shadow: var(--shadow-advice);
         }
         .advice-card.urgent {
-            background: linear-gradient(135deg, #fff5f5, #fdecea);
+            background: var(--bg-advice-urgent) !important;
             border-left-color: #c0392b;
-            box-shadow: 0 3px 12px rgba(192,57,43,0.11);
+            box-shadow: var(--shadow-advice-urg);
         }
         .advice-card.shap-driven {
-            background: linear-gradient(135deg, #f5f0ff, #ede8ff);
+            background: var(--bg-advice-shap) !important;
             border-left: 5px solid #7c3aed;
-            box-shadow: 0 3px 12px rgba(124,58,237,0.09);
+            box-shadow: var(--shadow-advice-shp);
         }
         .advice-title {
             font-family: 'Playfair Display', serif;
             font-size: 15px;
             font-weight: 600;
-            color: #3d1f5a;
+            color: var(--text-advice-title) !important;
             margin-bottom: 0.4rem;
+        }
+        .advice-card p {
+            color: var(--text-advice-body) !important;
+            line-height: 1.6;
         }
         .advice-dice {
             font-size: 12.5px;
-            color: #4a3070;
-            background: rgba(124,58,237,0.08);
+            color: var(--advice-dice-color) !important;
+            background: var(--advice-dice-bg) !important;
             padding: 0.4rem 0.8rem;
             border-radius: 8px;
             margin-top: 0.5rem;
@@ -334,68 +560,86 @@ def apply_global_css():
         }
         .advice-source-tag {
             font-size: 10.5px;
-            color: #9a8ab0;
+            color: var(--text-caption) !important;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             margin-bottom: 0.3rem;
         }
 
+        /* ══════════════════════════════════════════════
+           DICE INFO BOX
+        ══════════════════════════════════════════════ */
         .dice-info {
             padding: 1.1rem 1.5rem;
             border-radius: 16px;
-            background: linear-gradient(135deg, #eef4fb, #f8f0ff);
+            background: var(--bg-dice-info) !important;
             border-left: 4px solid #7c3aed;
             margin-bottom: 1rem;
             font-size: 13.5px;
-            color: #2d1a4b;
+            color: var(--text-dice-info) !important;
+        }
+        .dice-info b  { color: var(--dice-b-color) !important; }
+        .dice-info em { color: var(--dice-em-color) !important; }
+
+        /* ══════════════════════════════════════════════
+           ALL-CLEAR / RISK BANNER BOXES
+        ══════════════════════════════════════════════ */
+        .banner-allclear {
+            background: var(--bg-allclear) !important;
+            border-radius: 14px;
+            padding: 1rem 1.4rem;
+            border-left: 5px solid #27ae60;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .banner-allclear b  { color: var(--text-allclear) !important; font-size:14px; }
+        .banner-allclear span { font-size:12.5px; color: var(--text-allclear-sub) !important; }
+
+        .banner-highrisk {
+            background: var(--bg-highrisk) !important;
+            border-radius: 14px;
+            padding: 1rem 1.4rem;
+            border-left: 5px solid #c0392b;
+            margin-bottom: 1rem;
+        }
+        .banner-highrisk b    { color: var(--text-highrisk) !important; font-size:14px; }
+        .banner-highrisk span { font-size:13px; color: var(--text-highrisk-sub) !important; }
+
+        .banner-moderate {
+            background: var(--bg-moderate) !important;
+            border-radius: 14px;
+            padding: 1rem 1.4rem;
+            border-left: 5px solid #e67e22;
+            margin-bottom: 1rem;
+        }
+        .banner-moderate p { font-size:13px; color: var(--text-moderate-sub) !important; font-weight:600; margin-bottom:0.8rem; }
+
+        /* ══════════════════════════════════════════════
+           PROBA MINI BARS
+        ══════════════════════════════════════════════ */
+        .proba-track {
+            flex: 1;
+            background: var(--bg-proba-track) !important;
+            border-radius: 999px;
+            height: 8px;
+        }
+        .proba-label {
+            width: 70px;
+            font-size: 11px;
+            color: var(--text-proba-label) !important;
+        }
+        .proba-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
-        /* ── section headers ── */
-        h3 {
-            font-family: 'Playfair Display', serif !important;
-            color: #5b2d7a !important;
-        }
-
-        /* ── tabs ── */
-        div[data-testid="stTabs"] button {
-            font-family: 'Nunito', sans-serif;
-            font-size: 13.5px;
-            font-weight: 600;
-        }
-
-        /* ── buttons ── */
-        .stButton > button {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            border-radius: 12px;
-            letter-spacing: 0.03em;
-            background: linear-gradient(135deg, #b5467a, #7c3aed);
-            color: white;
-            border: none;
-            transition: opacity 0.2s, transform 0.15s;
-        }
-        .stButton > button:hover {
-            opacity: 0.92;
-            transform: translateY(-1px);
-        }
-
-        /* ── expander ── */
-        .streamlit-expanderHeader {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 600;
-        }
-
-        /* ── metric ── */
-        [data-testid="metric-container"] {
-            background: rgba(255,255,255,0.7);
-            border-radius: 12px;
-            padding: 0.6rem;
-            border: 1px solid rgba(181,70,122,0.1);
-        }
-
-        /* ── hero strip ── */
+        /* ══════════════════════════════════════════════
+           HERO STRIP
+        ══════════════════════════════════════════════ */
         .hero-strip {
-            background: linear-gradient(135deg, #b5467a 0%, #7c3aed 100%);
+            background: var(--bg-hero) !important;
             border-radius: 22px;
             padding: 2rem 2.5rem;
             margin-bottom: 1.5rem;
@@ -407,22 +651,149 @@ def apply_global_css():
             font-size: 36px;
             font-weight: 700;
             margin-bottom: 0.3rem;
+            color: white !important;
         }
-        .hero-strip .hero-sub {
-            font-size: 14px;
-            opacity: 0.88;
-        }
+        .hero-strip .hero-sub { font-size:14px; opacity:0.88; color:white !important; }
 
-        /* ── feature pill ── */
+        /* ══════════════════════════════════════════════
+           FEATURE PILL
+        ══════════════════════════════════════════════ */
         .feature-pill {
             display: inline-block;
             padding: 0.25rem 0.8rem;
             border-radius: 999px;
-            background: rgba(181,70,122,0.1);
-            color: #b5467a;
+            background: var(--bg-pill) !important;
+            color: var(--color-accent) !important;
             font-size: 12px;
             font-weight: 600;
             margin: 0.2rem 0.15rem;
+        }
+
+        /* ══════════════════════════════════════════════
+           BUTTONS
+        ══════════════════════════════════════════════ */
+        .stButton > button {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            border-radius: 12px;
+            letter-spacing: 0.03em;
+            background: linear-gradient(135deg,#b5467a,#7c3aed) !important;
+            color: white !important;
+            border: none !important;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .stButton > button:hover { opacity:0.92; transform:translateY(-1px); }
+
+        /* ══════════════════════════════════════════════
+           TABS
+        ══════════════════════════════════════════════ */
+        div[data-testid="stTabs"] button {
+            font-family: 'Nunito', sans-serif;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        /* ══════════════════════════════════════════════
+           EXPANDER
+        ══════════════════════════════════════════════ */
+        .streamlit-expanderHeader { font-family:'Nunito',sans-serif; font-weight:600; }
+        [data-testid="stExpander"] {
+            background: var(--bg-card) !important;
+            border-color: var(--border-card) !important;
+        }
+        [data-testid="stExpander"] summary {
+            color: var(--text-primary) !important;
+        }
+
+        /* ══════════════════════════════════════════════
+           METRIC
+        ══════════════════════════════════════════════ */
+        [data-testid="metric-container"] {
+            background: var(--bg-metric) !important;
+            border-radius: 12px;
+            padding: 0.6rem;
+            border: 1px solid var(--border-metric);
+        }
+
+        /* ══════════════════════════════════════════════
+           STEP CARDS (home page)
+        ══════════════════════════════════════════════ */
+        .step-card { text-align:center; padding:1.1rem 1rem; }
+        .step-title {
+            font-family:'Playfair Display',serif;
+            font-weight:600;
+            font-size:13px;
+            color: var(--text-card-header) !important;
+            margin-bottom:0.4rem;
+        }
+        .step-desc {
+            font-size:11.5px !important;
+            color: var(--text-secondary) !important;
+            line-height:1.5;
+        }
+
+        /* ══════════════════════════════════════════════
+           DISCLAIMER FOOTER
+        ══════════════════════════════════════════════ */
+        .disclaimer-text {
+            font-size: 11.5px;
+            color: var(--text-secondary) !important;
+            text-align: center;
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-card);
+            padding-top: 1.2rem;
+        }
+        .disclaimer-text b { color: var(--text-card-header) !important; }
+
+        /* ══════════════════════════════════════════════
+           INLINE-STYLE COLOUR OVERRIDES
+           For any hardcoded hex that slips through in
+           f-strings — map to CSS-variable equivalents.
+           Uses  html[data-theme="dark"]  for specificity.
+        ══════════════════════════════════════════════ */
+        html[data-theme="dark"] *[style*="color:#5b2d7a"],
+        html[data-theme="dark"] *[style*="color: #5b2d7a"] { color:var(--text-card-header) !important; }
+        html[data-theme="dark"] *[style*="color:#8b7b8e"],
+        html[data-theme="dark"] *[style*="color: #8b7b8e"] { color:var(--text-secondary) !important; }
+        html[data-theme="dark"] *[style*="color:#9a8ab0"],
+        html[data-theme="dark"] *[style*="color: #9a8ab0"] { color:var(--text-caption) !important; }
+        html[data-theme="dark"] *[style*="color:#9a8a9d"],
+        html[data-theme="dark"] *[style*="color: #9a8a9d"] { color:var(--text-caption) !important; }
+        html[data-theme="dark"] *[style*="color:#3d2c50"],
+        html[data-theme="dark"] *[style*="color: #3d2c50"] { color:var(--text-primary) !important; }
+        html[data-theme="dark"] *[style*="color:#3d1f5a"],
+        html[data-theme="dark"] *[style*="color: #3d1f5a"] { color:var(--text-advice-title) !important; }
+        html[data-theme="dark"] *[style*="color:#b08aba"],
+        html[data-theme="dark"] *[style*="color: #b08aba"] { color:var(--text-range) !important; }
+        html[data-theme="dark"] *[style*="color:#4a3070"],
+        html[data-theme="dark"] *[style*="color: #4a3070"] { color:var(--advice-dice-color) !important; }
+        html[data-theme="dark"] *[style*="color:#2d6a4f"],
+        html[data-theme="dark"] *[style*="color: #2d6a4f"] { color:#6ecfaa !important; }
+        html[data-theme="dark"] *[style*="color:#5a2020"],
+        html[data-theme="dark"] *[style*="color: #5a2020"] { color:#f0a0a0 !important; }
+        html[data-theme="dark"] *[style*="color:#7a3a1a"],
+        html[data-theme="dark"] *[style*="color: #7a3a1a"] { color:#f0c090 !important; }
+        html[data-theme="dark"] *[style*="color:#2d1a4b"],
+        html[data-theme="dark"] *[style*="color: #2d1a4b"] { color:var(--text-dice-info) !important; }
+        html[data-theme="dark"] *[style*="color:#0f9b6e"],
+        html[data-theme="dark"] *[style*="color: #0f9b6e"] { color:#4ecfa0 !important; }
+        html[data-theme="dark"] *[style*="color:#c0392b"],
+        html[data-theme="dark"] *[style*="color: #c0392b"] { color:#f07070 !important; }
+        html[data-theme="dark"] *[style*="color:#aaa"],
+        html[data-theme="dark"] *[style*="color: #aaa"]    { color:#8870a0 !important; }
+
+        /* background inline overrides */
+        html[data-theme="dark"] *[style*="background:#f0e8f5"],
+        html[data-theme="dark"] *[style*="background: #f0e8f5"] {
+            background: rgba(181,70,122,0.20) !important;
+        }
+        html[data-theme="dark"] *[style*="background:rgba(255,255,255,0.2)"],
+        html[data-theme="dark"] *[style*="background: rgba(255,255,255,0.2)"] {
+            background: rgba(255,255,255,0.10) !important;
+        }
+        html[data-theme="dark"] *[style*="background:rgba(124,58,237,0.08)"],
+        html[data-theme="dark"] *[style*="background: rgba(124,58,237,0.08)"] {
+            background: rgba(124,58,237,0.30) !important;
         }
         </style>
         """,
@@ -476,7 +847,7 @@ def get_shap_values(model, x_array, predicted_class_index=None):
 
 
 def plot_shap_bar(shap_values, feature_names, title):
-    idx_sorted = np.argsort(np.abs(shap_values))
+    idx_sorted  = np.argsort(np.abs(shap_values))
     shap_sorted = shap_values[idx_sorted]
     feat_sorted = np.array(feature_names)[idx_sorted]
 
@@ -514,7 +885,7 @@ def plot_shap_waterfall(shap_values, base_value, x_row, feature_names, title):
 
 
 # ─────────────────────────────────────────────
-# Advice renderer — now integrated into DiCE tab
+# Advice renderer
 # ─────────────────────────────────────────────
 def render_advice_section(
     input_data: dict,
@@ -525,70 +896,48 @@ def render_advice_section(
     risk_label: str = "",
     dice_deltas: dict = None,
 ):
-    """
-    Render clinical advice cards strictly based on patient input.
-
-    Rules:
-    - Flagged features (outside normal range) → always show advice.
-    - Binary risk flags set to 1 by the patient (diabetes, complications etc.) → always show advice.
-    - SHAP fallback → ONLY for High/Moderate risk AND ONLY for features where the patient
-      actually has a measurable problem (value outside range OR binary flag set).
-      Never shown for Low Risk or when every value is clinically normal.
-    - Low Risk with no flagged features → no advice rendered at all.
-    """
     flagged = get_flagged_features(input_data, normal_ranges)
 
-    # Flag binary clinical risk factors that the patient has set to Yes/1
     for feat in BINARY_RISK_FLAGS_DS3:
         if feat in input_data and float(input_data[feat]) > 0 and feat not in flagged:
             flagged.append(feat)
 
-    is_low_risk = "low" in risk_label.lower()
+    is_low_risk  = "low"  in risk_label.lower()
     is_high_risk = "high" in risk_label.lower()
 
-    # SHAP fallback: only for High/Moderate risk, only when there are actual flagged
-    # features to cross-reference — never surfaces phantom advice for clean patients.
     shap_features = []
     if not is_low_risk and is_high_risk and flagged and shap_values is not None and feature_names is not None:
-        # From the top SHAP drivers, only keep ones that are also flagged
-        # (i.e. the model is weighting something the patient genuinely has wrong)
         shap_features = get_shap_driven_advice_features(shap_values, feature_names, input_data, top_n=5)
         shap_features = [f for f in shap_features if f in flagged]
-        # Avoid duplicating what's already in flagged
-        shap_features = [f for f in shap_features if f not in flagged[:len(flagged)]]
 
-    all_advice_features = flagged  # shap_features only added as styling signal, not extra items
+    all_advice_features = flagged
 
     if not all_advice_features:
-        # Nothing flagged — show a clean all-clear message instead of silence
         st.markdown(
-            "<div style='background:linear-gradient(135deg,#f0fff8,#e8f8f0); border-radius:14px; "
-            "padding:1rem 1.4rem; border-left:5px solid #27ae60; margin-bottom:1rem; text-align:center;'>"
-            "<b style='color:#0f9b6e; font-size:14px;'>✅ All monitored parameters are within normal range.</b><br>"
-            "<span style='font-size:12.5px; color:#2d6a4f;'>Continue routine care, healthy lifestyle habits, "
+            "<div class='banner-allclear'>"
+            "<b>✅ All monitored parameters are within normal range.</b><br>"
+            "<span>Continue routine care, healthy lifestyle habits, "
             "and attend all scheduled appointments.</span>"
             "</div>",
             unsafe_allow_html=True,
         )
         return
 
-    # Header banner based on risk level
     if is_high_risk:
         st.markdown(
-            "<div style='background:linear-gradient(135deg,#fdecea,#fff5f5); border-radius:14px; "
-            "padding:1rem 1.4rem; border-left:5px solid #c0392b; margin-bottom:1rem;'>"
-            "<b style='color:#c0392b; font-size:14px;'>🚨 High Risk — Urgent Clinical Evaluation Recommended</b><br>"
-            "<span style='font-size:13px; color:#5a2020;'>"
-            "The following flagged parameters are key areas of concern. "
+            "<div class='banner-highrisk'>"
+            "<b>🚨 High Risk — Urgent Clinical Evaluation Recommended</b><br>"
+            "<span>The following flagged parameters are key areas of concern. "
             "Where DiCE targets are available, quantitative improvement goals are shown.</span>"
             "</div>",
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            f"<p style='font-size:13px; color:#7a3a1a; font-weight:600; margin-bottom:0.8rem;'>"
-            f"⚠️ <b>{len(flagged)} parameter(s)</b> flagged outside expected range — "
-            f"personalised advice shown below.</p>",
+            f"<div class='banner-moderate'>"
+            f"<p>⚠️ <b>{len(flagged)} parameter(s)</b> flagged outside expected range — "
+            f"personalised advice shown below.</p>"
+            f"</div>",
             unsafe_allow_html=True,
         )
 
@@ -598,16 +947,15 @@ def render_advice_section(
         if feat not in feature_advice:
             continue
         title_str, advice_str = feature_advice[feat]
-        is_urgent = feat in urgent_features
-
+        is_urgent  = feat in urgent_features
         card_class = "advice-card urgent" if is_urgent else "advice-card"
         source_tag = "<div class='advice-source-tag'>⚠️ Out-of-range / flagged parameter</div>"
 
         dice_hint = ""
         if dice_deltas and feat in dice_deltas:
-            delta = dice_deltas[feat]
+            delta     = dice_deltas[feat]
             direction = "increase" if delta > 0 else "decrease"
-            arrow = "↑" if delta > 0 else "↓"
+            arrow     = "↑" if delta > 0 else "↓"
             dice_hint = (
                 f"<div class='advice-dice'>"
                 f"🎯 DiCE target: {arrow} {direction} <b>{feat.replace('_', ' ')}</b> by "
@@ -619,7 +967,7 @@ def render_advice_section(
             f"<div class='{card_class}'>"
             f"{source_tag}"
             f"<div class='advice-title'>{title_str}</div>"
-            f"<p style='font-size:13px; color:#3d2c50; margin:0.2rem 0 0.5rem 0; line-height:1.6;'>{advice_str}</p>"
+            f"<p style='font-size:13px; margin:0.2rem 0 0.5rem 0; line-height:1.6;'>{advice_str}</p>"
             f"{dice_hint}"
             f"</div>",
             unsafe_allow_html=True,
@@ -632,19 +980,19 @@ def render_advice_section(
 @st.cache_resource(show_spinner=False)
 def get_dice_explainer(_model, feature_cols: tuple, actionable_features: tuple,
                         _X_train: np.ndarray, _y_train: np.ndarray):
-    feature_cols = list(feature_cols)
+    feature_cols        = list(feature_cols)
     actionable_features = list(actionable_features)
 
     X_train_df = pd.DataFrame(_X_train, columns=feature_cols)
-    y_arr = np.asarray(_y_train).ravel()
+    y_arr      = np.asarray(_y_train).ravel()
 
     label_map = None
     if y_arr.dtype.kind in {"U", "S", "O"}:
-        unique = sorted(set(y_arr.tolist()))
+        unique    = sorted(set(y_arr.tolist()))
         label_map = {lbl: i for i, lbl in enumerate(unique)}
-        y_arr = np.array([label_map[v] for v in y_arr])
+        y_arr     = np.array([label_map[v] for v in y_arr])
 
-    train_df = X_train_df.copy()
+    train_df               = X_train_df.copy()
     train_df["Risk Level"] = y_arr
 
     d = dice_ml.Data(
@@ -660,13 +1008,13 @@ def get_dice_explainer(_model, feature_cols: tuple, actionable_features: tuple,
         exp = Dice(d, m, method="random")
 
     permitted_range = {
-        "Systolic BP":  [110.0, 130.0],
-        "Diastolic":    [70.0, 90.0],
-        "BS":           [3.0,  20.0],
-        "Body Temp":    [96.0, 104.0],
-        "BMI":          [18.5, 28.0],
-        "Mental Health":[0.0,  1.0],
-        "Heart Rate":   [60.0, 100.0],
+        "Systolic BP":   [110.0, 130.0],
+        "Diastolic":     [70.0,  90.0],
+        "BS":            [3.0,   20.0],
+        "Body Temp":     [96.0,  104.0],
+        "BMI":           [18.5,  28.0],
+        "Mental Health": [0.0,   1.0],
+        "Heart Rate":    [60.0,  100.0],
     }
 
     return exp, permitted_range, label_map
@@ -710,9 +1058,9 @@ def get_first_cf_deltas(delta_df, actionable_features):
 
 
 def plot_dice_heatmap(delta_df, actionable_features, title):
-    data = delta_df[actionable_features].values.astype(float)
+    data           = delta_df[actionable_features].values.astype(float)
     n_cfs, n_feats = data.shape
-    vmax = np.abs(data).max()
+    vmax           = np.abs(data).max()
     if vmax == 0:
         vmax = 1.0
 
@@ -746,41 +1094,31 @@ def render_dice_tab(model, x_row, feature_cols, actionable_features,
                     X_train, y_train, predicted_label,
                     input_data=None, normal_ranges=None,
                     shap_values=None, feature_names=None):
-    """
-    Renders DiCE counterfactuals AND the integrated advice section below.
-    For Low Risk predictions, DiCE is skipped — only advice is shown if any
-    parameters are actually flagged.
-    """
     is_low_risk = "low" in predicted_label.lower()
 
-    # ── Low Risk: skip DiCE entirely ──────────────────────────────────────────
     if is_low_risk:
         st.markdown(
-            "<div style='background:linear-gradient(135deg,#f0fff8,#e8f8f0); border-radius:14px; "
-            "padding:1.1rem 1.5rem; border-left:5px solid #27ae60; margin-bottom:1rem;'>"
-            "<b style='color:#0f9b6e; font-size:14px;'>✅ Low Risk — Counterfactual Analysis Not Required</b><br>"
-            "<span style='font-size:13px; color:#2d6a4f;'>"
-            "DiCE counterfactuals are designed to identify changes that flip a high or moderate risk prediction. "
-            "Since the model predicts <b>Low Risk</b>, no what-if scenarios are generated. "
-            "Continue routine care and monitoring.</span>"
+            "<div class='banner-allclear' style='text-align:left;'>"
+            "<b>✅ Low Risk — Counterfactual Analysis Not Required</b><br>"
+            "<span>DiCE counterfactuals are designed to identify changes that flip a high or moderate "
+            "risk prediction. Since the model predicts <b>Low Risk</b>, no what-if scenarios are "
+            "generated. Continue routine care and monitoring.</span>"
             "</div>",
             unsafe_allow_html=True,
         )
-        # Still show advice if any parameters are genuinely flagged
         if input_data is not None and normal_ranges is not None:
             st.markdown("### 🩹 Clinical Advice")
             render_advice_section(
                 input_data=input_data,
                 normal_ranges=normal_ranges,
                 feature_advice=FEATURE_ADVICE_DS3,
-                shap_values=None,        # No SHAP fallback for Low Risk
+                shap_values=None,
                 feature_names=None,
                 risk_label=predicted_label,
                 dice_deltas=None,
             )
         return None, None
 
-    # ── High / Moderate Risk: run DiCE ───────────────────────────────────────
     st.markdown(
         "<div class='dice-info'>"
         "<b>💡 What is a Counterfactual?</b><br>"
@@ -839,22 +1177,20 @@ def render_dice_tab(model, x_row, feature_cols, actionable_features,
                 rows = []
                 for feat in actionable_features:
                     orig_val = float(orig_df[feat].values[0])
-                    new_val = float(cf_row[feat])
-                    delta = new_val - orig_val
-                    arrow = "⬆️" if delta > 0.005 else ("⬇️" if delta < -0.005 else "➡️")
+                    new_val  = float(cf_row[feat])
+                    delta    = new_val - orig_val
+                    arrow    = "⬆️" if delta > 0.005 else ("⬇️" if delta < -0.005 else "➡️")
                     rows.append({
-                        "Feature": feat.replace("_", " "),
-                        "Current Value": f"{orig_val:.2f}",
+                        "Feature":         feat.replace("_", " "),
+                        "Current Value":   f"{orig_val:.2f}",
                         "Suggested Value": f"{new_val:.2f}",
-                        "Change": f"{arrow} {delta:+.2f}",
+                        "Change":          f"{arrow} {delta:+.2f}",
                     })
                 st.dataframe(pd.DataFrame(rows).set_index("Feature"), use_container_width=True)
 
         st.caption("⚠️ These are model-derived suggestions only. Always apply clinical judgement.")
-
         dice_deltas = get_first_cf_deltas(delta_df, actionable_features)
 
-    # ── Integrated Clinical Advice ──
     if input_data is not None and normal_ranges is not None:
         st.markdown("---")
         st.markdown("### 🩹 Personalised Clinical Advice")
@@ -878,21 +1214,19 @@ def render_dice_tab(model, x_row, feature_cols, actionable_features,
 
 
 # ─────────────────────────────────────────────
-# PDF report — includes full advice section
+# PDF report
 # ─────────────────────────────────────────────
 def create_pdf_report(input_dict, pred_label, proba_dict=None,
                       shap_contribs=None, flagged_features=None,
                       feature_advice=None, dice_deltas=None,
                       shap_values=None, feature_names=None):
     buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
+    c      = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
     y = height - 50
 
-    # ── Header ──
     c.setFillColor(colors.HexColor("#b5467a"))
     c.rect(0, height - 85, width, 85, fill=True, stroke=False)
-    # accent strip
     c.setFillColor(colors.HexColor("#7c3aed"))
     c.rect(0, height - 85, 8, 85, fill=True, stroke=False)
 
@@ -913,94 +1247,65 @@ def create_pdf_report(input_dict, pred_label, proba_dict=None,
     y -= 22
 
     lower_label = str(pred_label).lower()
-    is_high = "high" in lower_label
-    is_low = "low" in lower_label
+    is_high     = "high" in lower_label
+    is_low      = "low"  in lower_label
 
-    # ── 1. Risk Summary ──
-    _pdf_section_header(c, "1. Risk Summary", y)
-    y -= 20
+    _pdf_section_header(c, "1. Risk Summary", y);            y -= 20
     c.setFont("Helvetica-Bold", 13)
-    if is_high:
-        c.setFillColor(colors.HexColor("#c0392b"))
-    elif is_low:
-        c.setFillColor(colors.HexColor("#0f9b6e"))
-    else:
-        c.setFillColor(colors.HexColor("#e6a817"))
+    if is_high:   c.setFillColor(colors.HexColor("#c0392b"))
+    elif is_low:  c.setFillColor(colors.HexColor("#0f9b6e"))
+    else:         c.setFillColor(colors.HexColor("#e6a817"))
     c.drawString(60, y, f"Predicted Risk Level: {pred_label}")
-    c.setFillColor(colors.black)
-    y -= 16
-
+    c.setFillColor(colors.black);  y -= 16
     c.setFont("Helvetica", 10)
     if is_high:
-        c.drawString(60, y, "The model suggests HIGH maternal risk.")
-        y -= 14
+        c.drawString(60, y, "The model suggests HIGH maternal risk.");  y -= 14
         c.setFont("Helvetica-Bold", 10)
         c.setFillColor(colors.HexColor("#c0392b"))
         c.drawString(60, y, "URGENT: Please consult a qualified health professional as soon as possible.")
-        c.setFillColor(colors.black)
-        c.setFont("Helvetica", 10)
-        y -= 14
+        c.setFillColor(colors.black);  c.setFont("Helvetica", 10);  y -= 14
     elif is_low:
-        c.drawString(60, y, "The model suggests LOW maternal risk. Continue routine monitoring.")
-        y -= 14
+        c.drawString(60, y, "The model suggests LOW maternal risk. Continue routine monitoring.");  y -= 14
     else:
-        c.drawString(60, y, "The model suggests MODERATE maternal risk. Close monitoring is advised.")
-        y -= 14
+        c.drawString(60, y, "The model suggests MODERATE maternal risk. Close monitoring is advised.");  y -= 14
     y -= 8
 
-    # ── 2. Probabilities ──
     if proba_dict:
         y = _pdf_page_break(c, y, height)
-        _pdf_section_header(c, "2. Class Probabilities", y)
-        y -= 18
+        _pdf_section_header(c, "2. Class Probabilities", y);  y -= 18
         c.setFont("Helvetica", 10)
         for cls, p in proba_dict.items():
-            c.drawString(60, y, f"{cls}: {p:.3f}  ({p*100:.1f}%)")
-            y -= 14
+            c.drawString(60, y, f"{cls}: {p:.3f}  ({p*100:.1f}%)");  y -= 14
             y = _pdf_page_break(c, y, height)
     y -= 8
 
-    # ── 3. Input Values ──
     y = _pdf_page_break(c, y, height)
-    _pdf_section_header(c, "3. Input Values Used", y)
-    y -= 18
+    _pdf_section_header(c, "3. Input Values Used", y);  y -= 18
     c.setFont("Helvetica", 10)
     for k, v in input_dict.items():
-        c.drawString(60, y, f"{k.replace('_', ' ')}: {v}")
-        y -= 14
+        c.drawString(60, y, f"{k.replace('_', ' ')}: {v}");  y -= 14
         y = _pdf_page_break(c, y, height)
     y -= 8
 
-    # ── 4. SHAP ──
     if shap_contribs:
         y = _pdf_page_break(c, y, height)
-        _pdf_section_header(c, "4. Top Influencing Features (SHAP)", y)
-        y -= 18
+        _pdf_section_header(c, "4. Top Influencing Features (SHAP)", y);  y -= 18
         c.setFont("Helvetica", 10)
-        c.drawString(60, y, "Positive SHAP = increased risk   |   Negative SHAP = decreased risk")
-        y -= 16
+        c.drawString(60, y, "Positive SHAP = increased risk   |   Negative SHAP = decreased risk");  y -= 16
         for feat, val in shap_contribs:
             indicator = "▲" if val > 0 else "▼"
-            c.drawString(60, y, f"{indicator}  {feat.replace('_', ' ')}: SHAP = {val:.4f}")
-            y -= 14
+            c.drawString(60, y, f"{indicator}  {feat.replace('_', ' ')}: SHAP = {val:.4f}");  y -= 14
             y = _pdf_page_break(c, y, height)
     y -= 8
 
-    # ── 5. Clinical Advice ──
-    # Only based on genuinely flagged parameters and binary flags set by the patient.
-    # SHAP-driven fallback is intentionally excluded from the PDF to avoid phantom advice.
     all_advice_features = list(flagged_features) if flagged_features else []
-
-    # Add binary clinical flags that the patient has set to Yes/1
     for feat in BINARY_RISK_FLAGS_DS3:
         if feat in input_dict and float(input_dict.get(feat, 0)) > 0 and feat not in all_advice_features:
             all_advice_features.append(feat)
 
     if all_advice_features and feature_advice:
         y = _pdf_page_break(c, y, height)
-        _pdf_section_header(c, "5. Clinical Advice", y)
-        y -= 18
-
+        _pdf_section_header(c, "5. Clinical Advice", y);  y -= 18
         for feat in all_advice_features:
             if feat not in feature_advice:
                 continue
@@ -1010,58 +1315,45 @@ def create_pdf_report(input_dict, pred_label, proba_dict=None,
             c.setFont("Helvetica-Bold", 10)
             c.setFillColor(colors.HexColor("#b5467a"))
             c.drawString(60, y, f"• {clean_title}")
-            c.setFillColor(colors.black)
-            y -= 14
-            # x=70, right margin=40 → available width = width - 70 - 40
+            c.setFillColor(colors.black);  y -= 14
             y = _pdf_wrap_text(c, advice_str, 70, y, width - 110, height,
                                font_name="Helvetica", font_size=9)
-            # DiCE hint — only for High/Moderate risk reports
             if not is_low and dice_deltas and feat in dice_deltas:
-                delta = dice_deltas[feat]
+                delta     = dice_deltas[feat]
                 direction = "increase" if delta > 0 else "decrease"
-                c.setFont("Helvetica-Oblique", 9)
-                c.setFillColor(colors.HexColor("#7c3aed"))
                 dice_hint_text = (f"DiCE target: {direction} {feat.replace('_',' ')} "
                                   f"by {abs(delta):.2f} units to potentially shift risk category.")
+                c.setFont("Helvetica-Oblique", 9)
+                c.setFillColor(colors.HexColor("#7c3aed"))
                 y = _pdf_wrap_text(c, dice_hint_text, 70, y, width - 110, height,
                                    font_name="Helvetica-Oblique", font_size=9)
                 c.setFillColor(colors.black)
             y -= 4
     elif is_low:
-        # Low risk, no flagged params — note it explicitly in PDF
         y = _pdf_page_break(c, y, height)
-        _pdf_section_header(c, "5. Clinical Advice", y)
-        y -= 18
+        _pdf_section_header(c, "5. Clinical Advice", y);  y -= 18
         c.setFont("Helvetica", 10)
         c.setFillColor(colors.HexColor("#0f9b6e"))
-        c.drawString(60, y, "All monitored parameters are within normal range.")
-        y -= 14
+        c.drawString(60, y, "All monitored parameters are within normal range.");  y -= 14
         c.setFillColor(colors.black)
-        c.drawString(60, y, "Continue routine care, healthy lifestyle habits, and scheduled appointments.")
-        y -= 14
+        c.drawString(60, y, "Continue routine care, healthy lifestyle habits, and scheduled appointments.");  y -= 14
     y -= 8
 
-    # ── 6. DiCE Summary — skipped for Low Risk ──
     if not is_low and dice_deltas:
         y = _pdf_page_break(c, y, height)
-        _pdf_section_header(c, "6. DiCE Counterfactual Targets (Scenario 1)", y)
-        y -= 18
+        _pdf_section_header(c, "6. DiCE Counterfactual Targets (Scenario 1)", y);  y -= 18
         c.setFont("Helvetica", 10)
-        c.drawString(60, y, "Minimum changes to potentially shift risk classification:")
-        y -= 14
+        c.drawString(60, y, "Minimum changes to potentially shift risk classification:");  y -= 14
         for feat, delta in dice_deltas.items():
             if abs(delta) < 0.001:
                 continue
             arrow = "↑" if delta > 0 else "↓"
-            c.drawString(70, y, f"{arrow}  {feat.replace('_',' ')}: {delta:+.3f}")
-            y -= 13
+            c.drawString(70, y, f"{arrow}  {feat.replace('_',' ')}: {delta:+.3f}");  y -= 13
             y = _pdf_page_break(c, y, height)
         y -= 8
 
-    # ── 7. Notice ──
     y = _pdf_page_break(c, y, height, min_y=100)
-    _pdf_section_header(c, "7. Important Notice", y)
-    y -= 16
+    _pdf_section_header(c, "7. Important Notice", y);  y -= 16
     notice1 = ("This report is generated by a machine learning model for use by trained "
                "health professionals only.")
     notice2 = ("It must not be used as the sole basis for any diagnosis or treatment decision.")
@@ -1088,12 +1380,12 @@ def _pdf_page_break(c, y, height, min_y=80):
     return y
 
 
-def _pdf_wrap_text(c, text, x, y, max_width_pts, page_height, font_name="Helvetica", font_size=9):
-    """Wrap text to fit within max_width_pts using actual glyph-width measurement."""
+def _pdf_wrap_text(c, text, x, y, max_width_pts, page_height,
+                   font_name="Helvetica", font_size=9):
     from reportlab.pdfbase.pdfmetrics import stringWidth
     c.setFont(font_name, font_size)
-    words = text.split()
-    line = ""
+    words       = text.split()
+    line        = ""
     line_height = font_size + 3
 
     for word in words:
@@ -1102,36 +1394,29 @@ def _pdf_wrap_text(c, text, x, y, max_width_pts, page_height, font_name="Helveti
             line = test_line
         else:
             if line:
-                c.drawString(x, y, line)
-                y -= line_height
+                c.drawString(x, y, line);  y -= line_height
                 if y < 80:
-                    c.showPage()
-                    y = page_height - 50
-                    c.setFont(font_name, font_size)
+                    c.showPage();  y = page_height - 50;  c.setFont(font_name, font_size)
             line = word
     if line:
-        c.drawString(x, y, line)
-        y -= line_height + 2
+        c.drawString(x, y, line);  y -= line_height + 2
     return y
 
 
 # ─────────────────────────────────────────────
-# Label formatter
+# Label formatter & risk colour
 # ─────────────────────────────────────────────
 def format_risk_label(raw_label: str) -> str:
-    s = str(raw_label).strip()
+    s     = str(raw_label).strip()
     lower = s.lower()
-    if lower in ["0", "low"]:
-        return "Low Risk"
-    if lower in ["1", "high"]:
-        return "High Risk"
-    if lower in ["2", "medium", "moderate"]:
-        return "Moderate Risk"
+    if lower in ["0", "low"]:      return "Low Risk"
+    if lower in ["1", "high"]:     return "High Risk"
+    if lower in ["2", "medium", "moderate"]: return "Moderate Risk"
     return s.capitalize()
 
 
 def risk_color(label: str):
     label = label.lower()
-    if "low" in label:  return "#0f9b6e"
+    if "low"  in label: return "#0f9b6e"
     if "high" in label: return "#c0392b"
     return "#e6a817"
